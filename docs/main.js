@@ -7,6 +7,7 @@ var Player = {
     pos: v(32, 64*23),
     vel: v(0, 0),
     onGround: true,
+    cyotoeTime:0,
     gravity: "down",
     movetype: "constant",
     direction: "right",
@@ -56,6 +57,7 @@ var Player = {
         }},
     ],
     Update: () => {
+        Player.cyotoeTime -= 1
         if(Player.gravity === "down") {
             let a = true
             for(let h of Player.level) {if(testRectCollision(Player.pos.x+8, Player.pos.y+64, 48, 1, h.pos.x, h.pos.y, h.scale.x, h.scale.y)) {
@@ -65,6 +67,7 @@ var Player = {
                         Player.pos.y = h.pos.y-64
                     }
                     Player.onGround = true
+                    Player.cyotoeTime = 10
                 }   
                 if(h.name === "spike") Player.Reset()
             }}
@@ -93,6 +96,7 @@ var Player = {
                         Player.pos.y = h.pos.y+h.scale.y
                     }
                     Player.onGround = true
+                    Player.cyotoeTime = 10
                 }   
                 if(h.name === "spike") Player.Reset()
             }}
@@ -122,6 +126,7 @@ var Player = {
                         Player.pos.x = h.pos.x+h.scale.x
                     }
                     Player.onGround = true
+                    Player.cyotoeTime = 10
                 }   
                 if(h.name === "spike") Player.Reset()
             }}
@@ -153,6 +158,7 @@ var Player = {
                         Player.pos.x = h.pos.x-65
                     }
                     Player.onGround = true
+                    Player.cyotoeTime = 10
                 }   
                 if(h.name === "spike") Player.Reset()
             }}
@@ -324,7 +330,8 @@ setInterval(() => {
     Player.pos.x += Player.vel.x/4
     Player.pos.y += Player.vel.y/4
     if(keydowns === "w") {
-        if(Player.onGround === true) {
+        if(Player.cyotoeTime > 0) {
+            Player.cyotoeTime = 0
             Player.gravity === "down" ? Player.vel.y = -17 : (Player.gravity === "left" ? Player.vel.x = 17 : (Player.gravity === "right" ? Player.vel.x = -17 : Player.vel.y = 17))
         }
     } 
