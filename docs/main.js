@@ -18,10 +18,14 @@ var Player = {
         {name:"block", pos:v(64*9, 64*22), scale: v(64*4, 64*2)},
         {name:"block", pos:v(64*9, 64*20-32), scale: v(64*1, 64*1)},
         {name:"spike", pos:v(64*12+16, 64*21+32), scale: v(64*0.5, 64*0.5)},
+        {name:"trigger", pos:v(64*13, 64*22), scale: v(64*0.2, 64*1), onCollision:()=>{
+            Player.direction = "right"
+        }},
         {name:"jumpspace", pos:v(64*32, 64*22), scale: v(64*1, 64*1), direction: "left", cooldown: [1000, 1000]},
         {name:"gravspace", pos:v(64*29, 64*19), scale: v(64*1, 64*1), rot:"up", cooldown: [2000, 2000]},
         {name:"block", pos:v(64*16, 64*16), scale: v(64*14, 64*1)},
-        {name:"spike", pos:v(64*27, 64*17), scale: v(64*3, 16)},
+        {name:"spike", pos:v(64*28.5, 64*17), scale: v(64*1.5, 16)},
+        {name:"spike", pos:v(64*0, 64*0), scale: v(64*200, 16)},
         {name:"spike", pos:v(64*17, 64*17), scale: v(64*3-32, 16)},
         {name:"spike", pos:v(64*16, 64*15+48), scale: v(64*4.5, 16)},
         {name:"block", pos:v(64*-0.25+4, 64*0), scale: v(64*0.25, 64*24)},
@@ -42,7 +46,14 @@ var Player = {
         {name:"warpspace", pos:v(64*35, 64*22), scale: v(64*1, 64*1), channel: 1, cooldown: [2000, 2000]},
         {name:"block", pos:v(64*38, 64*16), scale: v(64*1, 64*8)},
         {name:"gravspace", pos:v(64*39, 64*13), scale: v(64*1, 64*1), rot:"down", cooldown: [2000, 2000]},
-        {name:"block", pos:v(64*39, 64*16), scale: v(64*9, 64*1)},
+        {name:"block", pos:v(64*39, 64*16), scale: v(64*24, 64*1)},
+        {name:"warpspace", pos:v(64*57, 64*13), scale: v(64*1, 64*1), channel:2, cooldown: [2000, 2000]},
+        {name:"warpspace", pos:v(64*42, 64*19), scale: v(64*1, 64*1), channel: 2, cooldown: [2000, 2000]},
+        {name:"spike", pos:v(64*37.25, 64*16.25), scale: v(64*0.5, 64*0.5)},
+        {name:"trigger", pos:v(64*42, 64*19), scale: v(64*1, 64*1), onCollision:()=>{
+            Player.gravity = "up"
+            Player.direction = "right"
+        }},
     ],
     Update: () => {
         if(Player.gravity === "down") {
@@ -101,7 +112,7 @@ var Player = {
             
             if(Player.onGround === false) Player.vel.y += -1
             else Player.vel.y = 0
-            if(Player.movetype === "constant") Player.vel.x = -8
+            if(Player.movetype === "constant") Player.direction === "left" ? Player.vel.x = -8 : Player.vel.x = 8
         } if(Player.gravity === "left") {
             let a = true
             for(let h of Player.level) {if(testRectCollision(Player.pos.x, Player.pos.y+8, 1, 48, h.pos.x, h.pos.y, h.scale.x, h.scale.y)) {
@@ -215,6 +226,10 @@ document.addEventListener("keydown", (e) => {
     if(e.key === "a") {
         keydowns = "a"
     } 
+    if(e.key === "I") {
+        Player.level = JSON.parse( prompt("import: ") )
+        localStorage.setItem("currentLevel", JSON.stringify(Player.level))
+    }
 })
 document.addEventListener("keyup", (e) => {
     if(Player.movetype === "platformer") {
@@ -270,7 +285,7 @@ setInterval(() => {
                 
             }
         }
-        ctx.fillRect(o.pos.x, o.pos.y, o.scale.x, o.scale.y)
+        if(o.name !== "trigger") ctx.fillRect(o.pos.x, o.pos.y, o.scale.x, o.scale.y)
     }
 
     if(Player.movetype === "platformer") {
@@ -313,4 +328,11 @@ setInterval(() => {
             Player.gravity === "down" ? Player.vel.y = -17 : (Player.gravity === "left" ? Player.vel.x = 17 : (Player.gravity === "right" ? Player.vel.x = -17 : Player.vel.y = 17))
         }
     } 
+    for(let h of Player.level) {if(testRectCollision(Player.pos.x, Player.pos.y, 64, 64, h.pos.x, h.pos.y, h.scale.x, h.scale.y)) {
+        if(h.name === "trigger") h.onCollision()
+    }}
 }, 1000/240)
+
+if(localStorage.getItem("currentLevel") !== null) {
+    Player.level = JSON.parse(localStorage.getItem("currentLevel"))
+}
